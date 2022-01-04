@@ -30,7 +30,13 @@ def xlsx2kml(xlsx_path: str, kml_path: str) -> None:
 
         coordinates.append((lat, lng))
 
-    kml.newpolygon(coords=coordinates)
+    poly = kml.newpolygon(name="Polygon", description="test")
+    poly.outerboundaryis = coordinates
+    poly.innerboundaryis = coordinates
+    poly.style.linestyle.color = simplekml.Color.green
+    poly.style.linestyle.width = 5
+    poly.style.polystyle.color = \
+        simplekml.Color.changealphaint(100, simplekml.Color.green)
     kml.save(kml_path)
 
 
