@@ -1,6 +1,9 @@
 import os
 import sys
 
+from functools import reduce
+import operator
+import math
 import simplekml
 from openpyxl import load_workbook
 
@@ -18,9 +21,9 @@ def xlsx2kml(xlsx_path: str, kml_path: str) -> None:
     wb = load_workbook(filename=xlsx_path)
     sheet = wb.active  # uses the active sheet
 
-    kml = simplekml.Kml()
+    kml = simplekml.Kml(name='Hello')
 
-    coordinates = []
+    coords = list()
 
     for i, row in enumerate(sheet.rows):
         if row[0].value is None:
@@ -28,15 +31,20 @@ def xlsx2kml(xlsx_path: str, kml_path: str) -> None:
         lat = _dms2dd(*_parse_dms(row[0]))
         lng = _dms2dd(*_parse_dms(row[1]))
 
-        coordinates.append((lat, lng))
+        coords.append((lng, lat))
 
-    poly = kml.newpolygon(name="Polygon", description="test")
+    center = tuple(map(operator.truediv,
+                       reduce(lambda x, y: map(operator.add, x, y), coords),
+                       [len(coords)] * 2))
+    coordinates = sorted(coords, key=lambda coord: (-135 - math.degrees(
+        math.atan2(*tuple(map(operator.sub, coord, center))[::-1]))) % 360)
+    poly = kml.newpolygon(name="Poly", description="test")
     poly.outerboundaryis = coordinates
-    poly.innerboundaryis = coordinates
-    poly.style.linestyle.color = simplekml.Color.green
-    poly.style.linestyle.width = 5
-    poly.style.polystyle.color = \
-        simplekml.Color.changealphaint(100, simplekml.Color.green)
+    # poly.innerboundaryis = coordinates
+    # poly.style.linestyle.color = simplekml.Color.green
+    # poly.style.linestyle.width = 5
+    # poly.style.polystyle.color = \
+    #     simplekml.Color.changealphaint(100, simplekml.Color.green)
     kml.save(kml_path)
 
 
