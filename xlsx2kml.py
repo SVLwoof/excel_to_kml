@@ -33,13 +33,13 @@ def xlsx2kml(xlsx_path: str, kml_path: str) -> None:
 
         coords.append((lng, lat))
 
-    center = tuple(map(operator.truediv,
-                       reduce(lambda x, y: map(operator.add, x, y), coords),
-                       [len(coords)] * 2))
-    coordinates = sorted(coords, key=lambda coord: (-135 - math.degrees(
-        math.atan2(*tuple(map(operator.sub, coord, center))[::-1]))) % 360)
+#     center = tuple(map(operator.truediv,
+#                        reduce(lambda x, y: map(operator.add, x, y), coords),
+#                        [len(coords)] * 2))
+#     coordinates = sorted(coords, key=lambda coord: (-135 - math.degrees(
+#         math.atan2(*tuple(map(operator.sub, coord, center))[::-1]))) % 360)
     poly = kml.newpolygon(name="Poly", description="test")
-    poly.outerboundaryis = coordinates
+    poly.outerboundaryis = coords
     # poly.innerboundaryis = coordinates
     # poly.style.linestyle.color = simplekml.Color.green
     # poly.style.linestyle.width = 5
