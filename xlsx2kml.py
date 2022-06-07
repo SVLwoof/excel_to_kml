@@ -21,7 +21,7 @@ def xlsx2kml(xlsx_path: str, kml_path: str) -> None:
     wb = load_workbook(filename=xlsx_path)
     sheet = wb.active  # uses the active sheet
 
-    kml = simplekml.Kml(name='Hello')
+    # kml = simplekml.Kml(name='Hello')
 
     coords = list()
 
@@ -36,16 +36,21 @@ def xlsx2kml(xlsx_path: str, kml_path: str) -> None:
     center = tuple(map(operator.truediv,
                        reduce(lambda x, y: map(operator.add, x, y), coords),
                        [len(coords)] * 2))
+    center = max(coords, key=lambda x: x[0])
     coordinates = sorted(coords, key=lambda coord: (-135 - math.degrees(
         math.atan2(*tuple(map(operator.sub, coord, center))[::-1]))) % 360)
-    poly = kml.newpolygon(name="Poly", description="test")
-    poly.outerboundaryis = coordinates
+
+    with open(kml_path, 'w') as f:
+        for coord in coordinates:
+            f.write(f'{coord[1]},{coord[0]}\n')
+    # poly = kml.newpolygon(name="Poly", description="test")
+    # poly.outerboundaryis = coordinates
     # poly.innerboundaryis = coordinates
     # poly.style.linestyle.color = simplekml.Color.green
     # poly.style.linestyle.width = 5
     # poly.style.polystyle.color = \
     #     simplekml.Color.changealphaint(100, simplekml.Color.green)
-    kml.save(kml_path)
+    # kml.save(kml_path)
 
 
 if __name__ == '__main__':
@@ -61,8 +66,8 @@ if __name__ == '__main__':
     else:
         files_to_translate = [argument_path]
         output_path, extension = os.path.splitext(argument_path)
-    output_path += ".kml"
+    output_path += ".txt"
     for input_path in files_to_translate:
         output_path, extension = os.path.splitext(input_path)
-        output_path += ".kml"
+        output_path += ".txt"
         xlsx2kml(input_path, output_path)
